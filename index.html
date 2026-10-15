@@ -381,11 +381,14 @@ tbody tr:hover {
 @media(max-width:350px) {
   .stats-grid { grid-template-columns:1fr; }
 }
+
 </style>
 </head>
 
 <body>
+
 <main>
+  <p class="muted" id="syncStatus" style="margin-bottom:12px">Menghubungkan ke penyimpanan online...</p>
 
   <header>
     <h1>GOLD TRACKER</h1>
@@ -590,7 +593,7 @@ tbody tr:hover {
   <section class="card" style="margin-top:20px">
     <h2>Riwayat Transaksi</h2>
     <p class="muted">
-      Daftar pembelian emas yang tersimpan di browser.
+      Daftar pembelian emas yang tersimpan di database online.
     </p>
 
     <div class="table-wrap">
@@ -608,7 +611,7 @@ tbody tr:hover {
     </div>
 
     <p class="footer-note">
-      Data transaksi disimpan menggunakan Local Storage browser ini.
+      Data transaksi disimpan di database online dan dapat diakses dari perangkat lain tanpa login.
     </p>
   </section>
 
@@ -732,11 +735,40 @@ function initializeGoldChart() {
   }
 }
 
-let transactions = loadJSON(STORAGE.transactions, []);
-if (!Array.isArray(transactions)) transactions = [];
-
+let transactions = [];
 let spotPrice = Number(localStorage.getItem(STORAGE.spotPrice) || 0);
 let isRefreshing = false;
+let transactionRequestBusy = false;
+
+async function apiRequest(url, options = {}) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    cache: "no-store",
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      ...(options.body ? { "Content-Type": "application/json" } : {})
+    }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error || `Permintaan gagal (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
+function setSyncStatus(message) {
+  $("syncStatus").textContent = message;
+}
+
+async function loadRemoteTransactions() {
+  const data = await apiRequest("/api/transactions");
+  transactions = Array.isArray(data.transactions) ? data.transactions : [];
+  transactions.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  render();
+}
 
 $("date").value = localDate();
 
@@ -830,11 +862,22 @@ function renderHistory() {
     deleteButton.className = "delete-btn";
     deleteButton.textContent = "Hapus";
 
-    deleteButton.addEventListener("click", () => {
-      if (!confirm("Hapus transaksi ini?")) return;
-
-      transactions.splice(index, 1);
-      saveTransactions();
+    deleteButton.addEventListener("click", async () => {
+      if (!confirm("Hapus transaksi ini dari database online?")) return;
+      if (transactionRequestBusy) return;
+      transactionRequestBusy = true;
+      deleteButton.disabled = true;
+      try {
+        await apiRequest("/api/transactions?id=" + encodeURIComponent(t.id), {
+          method: "DELETE"
+        });
+        await loadRemoteTransactions();
+      } catch (error) {
+        alert("Transaksi gagal dihapus: " + error.message);
+      } finally {
+        transactionRequestBusy = false;
+        deleteButton.disabled = false;
+      }
     });
 
     actionCell.appendChild(deleteButton);
@@ -844,10 +887,7 @@ function renderHistory() {
 }
 
 function saveTransactions() {
-  localStorage.setItem(
-    STORAGE.transactions,
-    JSON.stringify(transactions)
-  );
+  // Transaksi disimpan melalui API Cloudflare D1, bukan localStorage.
   render();
 }
 
@@ -992,9 +1032,11 @@ async function refreshGoldPrice() {
   }
 }
 
-/* Tambah transaksi pembelian */
-$("buyForm").addEventListener("submit", event => {
+/* Tambah transaksi pembelian ke database online */
+$("buyForm").addEventListener("submit", async event => {
   event.preventDefault();
+
+  if (transactionRequestBusy) return;
 
   const grams = Number($("weight").value);
   const cost = Number($("cost").value);
@@ -1009,14 +1051,41 @@ $("buyForm").addEventListener("submit", event => {
     return;
   }
 
-  transactions.push({ date, grams, cost });
-  transactions.sort((a, b) => a.date.localeCompare(b.date));
+  transactionRequestBusy = true;
+  const submitButton = $("buyForm").querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  submitButton.textContent = "Menyimpan...";
 
-  saveTransactions();
-
-  $("buyForm").reset();
-  $("date").value = localDate();
+  try {
+    await apiRequest("/api/transactions", {
+      method: "POST",
+      body: JSON.stringify({ date, grams, cost })
+    });
+    await loadRemoteTransactions();
+    $("buyForm").reset();
+    $("date").value = localDate();
+    $("syncStatus").textContent = "Transaksi berhasil disimpan dan tersinkronisasi";
+  } catch (error) {
+    alert("Transaksi gagal disimpan: " + error.message);
+  } finally {
+    transactionRequestBusy = false;
+    submitButton.disabled = false;
+    submitButton.textContent = "+ Tambah Transaksi";
+  }
 });
+
+/* Status sinkronisasi tanpa login. API transaksi sengaja dibuka publik sesuai pilihan pengguna. */
+async function initializeRemoteTransactions() {
+  try {
+    await loadRemoteTransactions();
+    setSyncStatus("Terhubung · transaksi tersimpan online dan dapat diakses dari perangkat lain");
+  } catch (error) {
+    transactions = [];
+    render();
+    setSyncStatus("Gagal memuat transaksi online: " + error.message + ". Periksa deployment dan database Cloudflare.");
+    console.error("Gagal memuat transaksi online:", error);
+  }
+}
 
 /* Muat harga terakhir yang tersimpan */
 const savedPrice = Number(
@@ -1033,6 +1102,7 @@ if (savedPrice > 0) {
 render();
 initializeGoldChart();
 refreshGoldPrice();
+initializeRemoteTransactions();
 
 setInterval(refreshGoldPrice, REFRESH_INTERVAL);
 </script>
