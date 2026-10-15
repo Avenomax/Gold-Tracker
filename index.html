@@ -1,0 +1,1041 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1220">
+<title>Gold Tracker | Investasi Emas</title>
+
+<style>
+:root {
+  --bg:#0b1220;
+  --panel:#172337;
+  --panel-dark:#0e1829;
+  --border:#29374b;
+  --gold:#d5b36a;
+  --gold-light:#f0d99d;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --green:#79d8ad;
+  --red:#fca5a5;
+  --radius:16px;
+}
+
+* { box-sizing:border-box; }
+
+body {
+  margin:0;
+  padding:26px 20px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  line-height:1.5;
+}
+
+main {
+  max-width:1200px;
+  margin:auto;
+}
+
+h1,h2,h3,p { margin-top:0; }
+
+h1 {
+  margin-bottom:4px;
+  font-size:clamp(25px,4vw,34px);
+  letter-spacing:1.5px;
+  color:var(--gold-light);
+}
+
+h2 { font-size:19px; margin-bottom:12px; }
+h3 { font-size:17px; }
+
+.subtitle,.muted {
+  color:var(--muted);
+  font-size:13px;
+}
+
+.subtitle { margin-bottom:25px; }
+
+.section-title {
+  margin:28px 0 14px;
+  font-size:18px;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  margin-bottom:20px;
+}
+
+.stats-grid {
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+.card {
+  min-width:0;
+  padding:22px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+
+.stat-card {
+  position:relative;
+  overflow:hidden;
+}
+
+.stat-card::before {
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:var(--gold);
+}
+
+.stat-label {
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:9px;
+}
+
+.value {
+  font-size:clamp(20px,2.5vw,27px);
+  font-weight:700;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+}
+
+.stat-note {
+  margin:8px 0 0;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.gold-text { color:var(--gold-light); }
+.profit { color:var(--green); }
+.loss { color:var(--red); }
+
+/* AREA GRAFIK TRADINGVIEW */
+.chart-card {
+  margin-bottom:20px;
+  overflow:hidden;
+}
+
+.chart-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--border);
+}
+
+.chart-header h2 {
+  margin-bottom:4px;
+}
+
+.chart-period {
+  padding:6px 10px;
+  color:var(--gold-light);
+  background:var(--panel-dark);
+  border:1px solid var(--border);
+  border-radius:7px;
+  font-size:11px;
+}
+
+.chart {
+  width:100%;
+  height:480px;
+  margin-top:18px;
+  overflow:hidden;
+  border-radius:10px;
+  background:#ffffff;
+}
+
+.tradingview-widget-container,
+.tradingview-widget-container__widget {
+  width:100%;
+  height:100%;
+}
+
+.panel-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.status-pill {
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:6px 10px;
+  background:var(--panel-dark);
+  border:1px solid var(--border);
+  border-radius:20px;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.status-dot {
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--gold);
+  flex-shrink:0;
+}
+
+.status-dot.online { background:var(--green); }
+.status-dot.error { background:var(--red); }
+
+.market-price {
+  margin:18px 0;
+  padding:17px;
+  border-radius:12px;
+  background:var(--panel-dark);
+  border:1px solid var(--border);
+}
+
+.market-price .value { margin-top:5px; }
+
+.market-details {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.detail-box {
+  padding:15px;
+  border-radius:10px;
+  background:var(--panel-dark);
+  border:1px solid var(--border);
+  min-width:0;
+}
+
+.detail-box .value {
+  font-size:19px;
+  margin-top:5px;
+}
+
+.trend-box {
+  margin-top:15px;
+  padding:17px;
+  border-radius:12px;
+  background:var(--panel-dark);
+  border:1px solid var(--border);
+}
+
+.trend-box .value {
+  margin-top:6px;
+  font-size:21px;
+}
+
+.trend-change {
+  margin-top:7px;
+  font-size:14px;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+
+.footer-note {
+  margin-top:15px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+label {
+  display:block;
+  margin-top:15px;
+  margin-bottom:7px;
+  font-size:13px;
+  color:#dbe4f0;
+}
+
+input,button {
+  width:100%;
+  min-height:44px;
+  padding:11px 13px;
+  border-radius:9px;
+  border:1px solid #334155;
+  font:inherit;
+  font-size:14px;
+}
+
+input {
+  background:var(--bg);
+  color:var(--text);
+  outline:none;
+}
+
+input:focus {
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px rgba(213,179,106,.12);
+}
+
+button {
+  margin-top:15px;
+  background:var(--gold);
+  color:#101827;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  transition:background .2s;
+}
+
+button:hover {
+  background:var(--gold-light);
+}
+
+.table-wrap {
+  width:100%;
+  overflow-x:auto;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  white-space:nowrap;
+}
+
+th,td {
+  padding:13px 12px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+
+th {
+  color:var(--gold-light);
+  background:var(--panel-dark);
+  font-weight:600;
+}
+
+tbody tr:hover {
+  background:rgba(255,255,255,.025);
+}
+
+.delete-btn {
+  width:auto;
+  min-height:32px;
+  margin:0;
+  padding:5px 11px;
+  color:var(--red);
+  background:#38202a;
+  font-size:12px;
+}
+
+.delete-btn:hover {
+  background:#512b37;
+}
+
+.empty-state {
+  padding:25px;
+  color:var(--muted);
+  text-align:center;
+}
+
+@media(max-width:900px) {
+  .stats-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:600px) {
+  body { padding:18px 12px; }
+
+  .card {
+    padding:17px;
+    border-radius:13px;
+  }
+
+  .grid {
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+
+  .stats-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .value { font-size:21px; }
+
+  .chart { height:370px; }
+
+  .market-details {
+    grid-template-columns:1fr;
+  }
+
+  .status-pill { white-space:normal; }
+
+  th,td { padding:11px 9px; }
+}
+
+@media(max-width:350px) {
+  .stats-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+  <header>
+    <h1>GOLD TRACKER</h1>
+    <p class="subtitle">Dashboard investasi emas pribadi</p>
+  </header>
+
+  <!-- RINGKASAN INVESTASI -->
+  <h2 class="section-title">Ringkasan Investasi</h2>
+
+  <section class="grid stats-grid">
+    <div class="card stat-card">
+      <div class="stat-label">Total Kepemilikan Emas</div>
+      <div class="value gold-text" id="grams">0 gram</div>
+      <p class="stat-note">Akumulasi seluruh transaksi</p>
+    </div>
+
+    <div class="card stat-card">
+      <div class="stat-label">Modal Investasi</div>
+      <div class="value" id="capital">Rp0</div>
+      <p class="stat-note">Total biaya pembelian</p>
+    </div>
+
+    <div class="card stat-card">
+      <div class="stat-label">Estimasi Nilai Aset</div>
+      <div class="value" id="asset">Menunggu data</div>
+      <p class="stat-note">Berdasarkan harga spot global</p>
+    </div>
+
+    <div class="card stat-card">
+      <div class="stat-label">Profit / Loss</div>
+      <div class="value" id="profit">Menunggu data</div>
+      <p class="stat-note" id="percent">Masukkan modal pembelian</p>
+    </div>
+  </section>
+
+  <!-- GRAFIK TRADINGVIEW -->
+  <section class="card chart-card">
+    <div class="chart-header">
+      <div>
+        <h2>Grafik Harga Emas</h2>
+        <p class="muted">Pergerakan harga emas global · XAU/USD</p>
+      </div>
+      <span class="chart-period">TradingView · Daily</span>
+    </div>
+
+    <div class="chart">
+      <div
+        class="tradingview-widget-container"
+        id="goldChartContainer"
+        style="height:100%;width:100%"
+      >
+        <div
+          class="tradingview-widget-container__widget"
+          style="height:100%;width:100%"
+        ></div>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      Grafik disediakan oleh TradingView dan mengikuti pembaruan data mereka.
+    </p>
+  </section>
+
+  <!-- PEMANTAUAN PASAR -->
+  <h2 class="section-title">Pemantauan Pasar</h2>
+
+  <section class="grid">
+
+    <div class="card">
+      <div class="panel-header">
+        <div>
+          <h2>Pergerakan Harga Emas</h2>
+          <p class="muted">
+            Harga spot global dikonversi ke rupiah per gram.
+          </p>
+        </div>
+
+        <div class="status-pill">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="connectionStatus">Menghubungkan...</span>
+        </div>
+      </div>
+
+      <div class="market-price">
+        <div class="stat-label">Harga Emas per Gram</div>
+        <div class="value gold-text" id="autoPrice">Memuat data...</div>
+        <p class="stat-note">
+          Estimasi berdasarkan XAU/USD dan USD/IDR
+        </p>
+      </div>
+
+      <div class="trend-box" id="trendBox">
+        <div class="stat-label">
+          Perubahan sejak pembaruan harga sebelumnya
+        </div>
+        <div class="value" id="trendLabel">Menunggu data...</div>
+        <div class="trend-change" id="trendChange">--</div>
+        <p class="stat-note" id="trendStatus">
+          Menunggu data pembanding.
+        </p>
+      </div>
+
+      <div class="market-details" style="margin-top:15px">
+        <div class="detail-box">
+          <div class="stat-label">Harga Global (USD/oz)</div>
+          <div class="value" id="spotUsd">Memuat...</div>
+        </div>
+
+        <div class="detail-box">
+          <div class="stat-label">Kurs USD/IDR</div>
+          <div class="value" id="exchangeRate">Memuat...</div>
+        </div>
+      </div>
+
+      <p class="footer-note" id="priceStatus" aria-live="polite">
+        Menunggu pembaruan harga pertama...
+      </p>
+      <p class="footer-note">
+        Pembaruan otomatis setiap 1 menit selama halaman terbuka.
+      </p>
+    </div>
+
+    <!-- ESTIMASI PENJUALAN -->
+    <div class="card">
+      <h2>Estimasi Hasil Penjualan Emas</h2>
+      <p class="muted">
+        Perkiraan nilai penjualan seluruh emas berdasarkan harga spot global.
+      </p>
+
+      <div class="market-price">
+        <div class="stat-label">Total Emas yang Dimiliki</div>
+        <div class="value gold-text" id="sellGrams">0 gram</div>
+      </div>
+
+      <div class="detail-box">
+        <div class="stat-label">Harga Global per Gram</div>
+        <div class="value" id="sellPricePerGram">Menunggu data...</div>
+      </div>
+
+      <div class="trend-box">
+        <div class="stat-label">Estimasi Uang Hasil Penjualan</div>
+        <div class="value gold-text" id="sellValue">Menunggu data...</div>
+        <p class="stat-note">
+          Nilai bruto sebelum spread dan biaya transaksi.
+        </p>
+      </div>
+
+      <div class="detail-box" style="margin-top:15px">
+        <div class="stat-label">Selisih terhadap Modal</div>
+        <div class="value" id="sellProfit">Menunggu data...</div>
+        <p class="stat-note" id="sellProfitPercent">
+          Berdasarkan total modal pembelian.
+        </p>
+      </div>
+
+      <p class="footer-note">
+        Harga spot global bukan penawaran jual aktual. Spread dan harga
+        pembelian kembali dapat memengaruhi hasil pencairan.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- TAMBAH TRANSAKSI -->
+  <h2 class="section-title">Transaksi Investasi</h2>
+
+  <section class="card">
+    <h2>Tambah Pembelian</h2>
+    <p class="muted">
+      Catat pembelian emas untuk menghitung modal dan profit/loss.
+    </p>
+
+    <form id="buyForm">
+      <label for="date">Tanggal pembelian</label>
+      <input id="date" type="date" required>
+
+      <label for="weight">Berat emas (gram)</label>
+      <input
+        id="weight"
+        type="number"
+        min="0.0001"
+        step="any"
+        placeholder="Contoh: 0.045"
+        required
+      >
+
+      <label for="cost">Total biaya pembelian (Rp)</label>
+      <input
+        id="cost"
+        type="number"
+        min="1"
+        step="any"
+        placeholder="Contoh: 110000"
+        required
+      >
+
+      <button type="submit">+ Tambah Transaksi</button>
+    </form>
+  </section>
+
+  <!-- RIWAYAT TRANSAKSI -->
+  <section class="card" style="margin-top:20px">
+    <h2>Riwayat Transaksi</h2>
+    <p class="muted">
+      Daftar pembelian emas yang tersimpan di browser.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Berat</th>
+            <th>Modal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+
+    <p class="footer-note">
+      Data transaksi disimpan menggunakan Local Storage browser ini.
+    </p>
+  </section>
+
+</main>
+
+<!-- KONFIGURASI GRAFIK DALAM JSON TERPISAH -->
+<script type="application/json" id="goldChartConfig">
+{
+  "symbols": [
+    ["Gold", "TVC:GOLD|1D"]
+  ],
+  "chartType": "area",
+  "lineWidth": 2,
+  "lineType": 0,
+  "fontColor": "rgb(106, 109, 120)",
+  "gridLineColor": "rgba(46, 46, 46, 0.06)",
+  "upColor": "#22ab94",
+  "downColor": "#f7525f",
+  "borderUpColor": "#22ab94",
+  "borderDownColor": "#f7525f",
+  "backgroundColor": "#ffffff",
+  "widgetFontColor": "#131722",
+  "colorTheme": "light",
+  "isTransparent": false,
+  "locale": "en",
+  "chartOnly": false,
+  "scalePosition": "right",
+  "scaleMode": "Normal",
+  "valuesTracking": "1",
+  "changeMode": "price-and-percent",
+  "dateRanges": [
+    "1d|1",
+    "5d|5",
+    "1m|30",
+    "6m|1D",
+    "12m|1D",
+    "60m|1W",
+    "all|1M"
+  ],
+  "fontSize": "10",
+  "headerFontSize": "medium",
+  "autosize": true,
+  "width": "100%",
+  "height": "100%",
+  "hideDateRanges": false,
+  "hideMarketStatus": false,
+  "hideSymbolLogo": false,
+  "showVolume": false,
+  "showMA": false
+}
+</script>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const STORAGE = {
+  transactions: "goldTransactions",
+  spotPrice: "goldSpotPrice",
+  spotUpdated: "goldSpotUpdated",
+  previousUsd: "goldPreviousUsd",
+  previousGram: "goldPreviousGram"
+};
+
+const REFRESH_INTERVAL = 60 * 1000;
+const OUNCE_TO_GRAM = 31.1034768;
+
+const rupiah = n => "Rp " + Number(n).toLocaleString("id-ID", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2
+});
+
+const decimal = (n, digits = 6) =>
+  Number(n).toLocaleString("id-ID", {
+    maximumFractionDigits: digits
+  });
+
+const usdFormat = n => Number(n).toLocaleString("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+function localDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function loadJSON(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value !== null ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/* Inisialisasi grafik TradingView */
+function initializeGoldChart() {
+  const container = $("goldChartContainer");
+  const configElement = $("goldChartConfig");
+
+  if (!container || !configElement) return;
+
+  try {
+    const config = JSON.parse(configElement.textContent);
+
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js";
+    script.async = true;
+    script.textContent = JSON.stringify(config);
+
+    container.appendChild(script);
+  } catch (error) {
+    console.error("Konfigurasi grafik tidak valid:", error);
+  }
+}
+
+let transactions = loadJSON(STORAGE.transactions, []);
+if (!Array.isArray(transactions)) transactions = [];
+
+let spotPrice = Number(localStorage.getItem(STORAGE.spotPrice) || 0);
+let isRefreshing = false;
+
+$("date").value = localDate();
+
+function getTotalGrams() {
+  return transactions.reduce(
+    (sum, t) => sum + Number(t.grams || 0), 0
+  );
+}
+
+function getCapital() {
+  return transactions.reduce(
+    (sum, t) => sum + Number(t.cost || 0), 0
+  );
+}
+
+function render() {
+  const grams = getTotalGrams();
+  const capital = getCapital();
+  const asset = grams * spotPrice;
+  const profit = asset - capital;
+  const percent = capital > 0 ? profit / capital * 100 : 0;
+
+  $("grams").textContent = decimal(grams) + " gram";
+  $("capital").textContent = rupiah(capital);
+  $("asset").textContent =
+    spotPrice > 0 ? rupiah(asset) : "Menunggu data";
+
+  $("profit").textContent =
+    capital > 0 && spotPrice > 0
+      ? (profit > 0 ? "+" : "") + rupiah(profit)
+      : "Belum tersedia";
+
+  $("profit").className =
+    "value " + (profit > 0 ? "profit" : profit < 0 ? "loss" : "");
+
+  $("percent").textContent =
+    capital > 0 && spotPrice > 0
+      ? (percent > 0 ? "+" : "") + percent.toFixed(2) + "%"
+      : "Masukkan modal pembelian untuk menghitung profit/loss";
+
+  $("sellGrams").textContent = decimal(grams) + " gram";
+  $("sellPricePerGram").textContent =
+    spotPrice > 0 ? rupiah(spotPrice) : "Menunggu data...";
+  $("sellValue").textContent =
+    spotPrice > 0 ? rupiah(asset) : "Menunggu data...";
+
+  $("sellProfit").textContent =
+    capital > 0 && spotPrice > 0
+      ? (profit > 0 ? "+" : "") + rupiah(profit)
+      : "Belum tersedia";
+
+  $("sellProfit").className =
+    "value " + (profit > 0 ? "profit" : profit < 0 ? "loss" : "");
+
+  $("sellProfitPercent").textContent =
+    capital > 0 && spotPrice > 0
+      ? (percent > 0 ? "+" : "") + percent.toFixed(2) + "% dibandingkan modal"
+      : "Masukkan modal pembelian untuk menghitung selisih";
+
+  renderHistory();
+}
+
+function renderHistory() {
+  const tbody = $("history");
+  tbody.replaceChildren();
+
+  if (transactions.length === 0) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.className = "empty-state";
+    cell.textContent = "Belum ada transaksi pembelian.";
+    row.appendChild(cell);
+    tbody.appendChild(row);
+    return;
+  }
+
+  transactions.forEach((t, index) => {
+    const row = document.createElement("tr");
+
+    [t.date, decimal(t.grams) + " g", rupiah(t.cost)].forEach(value => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+
+    const actionCell = document.createElement("td");
+    const deleteButton = document.createElement("button");
+
+    deleteButton.type = "button";
+    deleteButton.className = "delete-btn";
+    deleteButton.textContent = "Hapus";
+
+    deleteButton.addEventListener("click", () => {
+      if (!confirm("Hapus transaksi ini?")) return;
+
+      transactions.splice(index, 1);
+      saveTransactions();
+    });
+
+    actionCell.appendChild(deleteButton);
+    row.appendChild(actionCell);
+    tbody.appendChild(row);
+  });
+}
+
+function saveTransactions() {
+  localStorage.setItem(
+    STORAGE.transactions,
+    JSON.stringify(transactions)
+  );
+  render();
+}
+
+function setConnectionStatus(state, label) {
+  $("connectionStatus").textContent = label;
+
+  $("statusDot").className =
+    "status-dot" +
+    (state === "online" ? " online" :
+     state === "error" ? " error" : "");
+}
+
+function renderTrend(currentPrice, previousPrice) {
+  const label = $("trendLabel");
+  const change = $("trendChange");
+  const box = $("trendBox");
+
+  if (!(previousPrice > 0)) {
+    label.textContent = "Menunggu pembanding";
+    label.style.color = "var(--gold-light)";
+    change.textContent = "Data pembanding belum tersedia";
+    change.style.color = "var(--muted)";
+    box.style.background = "var(--panel-dark)";
+    $("trendStatus").textContent =
+      "Perubahan akan dihitung pada pembaruan berikutnya.";
+    return;
+  }
+
+  const difference = currentPrice - previousPrice;
+  const percentage = difference / previousPrice * 100;
+
+  if (difference > 0) {
+    label.textContent = "▲ Harga Naik";
+    label.style.color = "var(--green)";
+    change.style.color = "var(--green)";
+    box.style.background = "#12352c";
+  } else if (difference < 0) {
+    label.textContent = "▼ Harga Turun";
+    label.style.color = "var(--red)";
+    change.style.color = "var(--red)";
+    box.style.background = "#3b2028";
+  } else {
+    label.textContent = "— Harga Stabil";
+    label.style.color = "var(--text)";
+    change.style.color = "var(--text)";
+    box.style.background = "var(--panel-dark)";
+  }
+
+  const sign = difference > 0 ? "+" : "";
+
+  change.textContent =
+    sign + rupiah(difference) + " (" +
+    sign + percentage.toFixed(3) + "%)";
+
+  $("trendStatus").textContent =
+    "Dibandingkan pembaruan harga sebelumnya.";
+}
+
+async function fetchWithTimeout(url, timeout = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("Permintaan data gagal: " + response.status);
+    }
+
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function refreshGoldPrice() {
+  if (isRefreshing) return;
+
+  isRefreshing = true;
+  setConnectionStatus("loading", "Memperbarui...");
+  $("priceStatus").textContent = "Mengambil data harga terbaru...";
+
+  try {
+    const [goldData, fxData] = await Promise.all([
+      fetchWithTimeout("https://api.gold-api.com/price/XAU"),
+      fetchWithTimeout(
+        "https://api.frankfurter.dev/v1/latest?base=USD&symbols=IDR"
+      )
+    ]);
+
+    const goldUsd = Number(goldData.price);
+    const rate = Number(fxData.rates?.IDR);
+
+    if (
+      !Number.isFinite(goldUsd) || goldUsd <= 0 ||
+      !Number.isFinite(rate) || rate <= 0
+    ) {
+      throw new Error("Data harga tidak valid.");
+    }
+
+    const newSpotPrice = goldUsd / OUNCE_TO_GRAM * rate;
+
+    const previousGram = Number(
+      localStorage.getItem(STORAGE.previousGram) ||
+      localStorage.getItem(STORAGE.spotPrice) || 0
+    );
+
+    spotPrice = newSpotPrice;
+
+    $("autoPrice").textContent = rupiah(newSpotPrice);
+    $("spotUsd").textContent = "$" + usdFormat(goldUsd);
+    $("exchangeRate").textContent = rupiah(rate);
+
+    renderTrend(newSpotPrice, previousGram);
+
+    localStorage.setItem(STORAGE.spotPrice, String(newSpotPrice));
+    localStorage.setItem(STORAGE.previousGram, String(newSpotPrice));
+    localStorage.setItem(STORAGE.previousUsd, String(goldUsd));
+    localStorage.setItem(STORAGE.spotUpdated, new Date().toISOString());
+
+    const now = new Date().toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "medium"
+    });
+
+    $("priceStatus").textContent = "Berhasil diperbarui: " + now;
+    setConnectionStatus("online", "Data terhubung");
+    render();
+
+  } catch (error) {
+    console.error("Pembaruan harga gagal:", error);
+
+    setConnectionStatus("error", "Koneksi bermasalah");
+
+    $("priceStatus").textContent =
+      "Gagal memperbarui harga. Data terakhir tetap ditampilkan jika tersedia.";
+  } finally {
+    isRefreshing = false;
+  }
+}
+
+/* Tambah transaksi pembelian */
+$("buyForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const grams = Number($("weight").value);
+  const cost = Number($("cost").value);
+  const date = $("date").value;
+
+  if (
+    !date ||
+    !Number.isFinite(grams) || grams <= 0 ||
+    !Number.isFinite(cost) || cost <= 0
+  ) {
+    alert("Masukkan tanggal, berat, dan biaya yang valid.");
+    return;
+  }
+
+  transactions.push({ date, grams, cost });
+  transactions.sort((a, b) => a.date.localeCompare(b.date));
+
+  saveTransactions();
+
+  $("buyForm").reset();
+  $("date").value = localDate();
+});
+
+/* Muat harga terakhir yang tersimpan */
+const savedPrice = Number(
+  localStorage.getItem(STORAGE.spotPrice) || 0
+);
+
+if (savedPrice > 0) {
+  spotPrice = savedPrice;
+  $("autoPrice").textContent = rupiah(savedPrice);
+  $("sellPricePerGram").textContent = rupiah(savedPrice);
+}
+
+/* Jalankan dashboard */
+render();
+initializeGoldChart();
+refreshGoldPrice();
+
+setInterval(refreshGoldPrice, REFRESH_INTERVAL);
+</script>
+
+</body>
+</html>
